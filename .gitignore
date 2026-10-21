@@ -1,0 +1,22 @@
+# Virtual environment (can be recreated with: pip install -r requirements.txt)
+.venv/
+
+# Secrets (API token, Gmail password, database password)
+.env
+
+# Python cache files (created automatically when Python runs)
+__pycache__/
+*.pyc
+
+# Local SQLite database (in case Django creates one)
+db.sqlite3
+
+# Celery Beat schedule file (created when Celery Beat runs)
+celerybeat-schedule*
+
+# Mac system files
+.DS_Store
+
+# Editor settings
+.vscode/
+.idea/
