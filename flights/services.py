@@ -1,6 +1,7 @@
 import os
 import requests
-from .models import FlightOffer
+from .models import FlightOffer, Route
+from datetime import date
 
 API_URL = "https://api.travelpayouts.com/aviasales/v3/prices_for_dates"
 
@@ -42,3 +43,22 @@ def save_prices(route, month):
             duration=t["duration"],
             link="https://www.aviasales.com" + t["link"],
         )
+
+
+def fetch_all_prices():
+    today = date.today()
+    months = []
+    for i in range(1, 4):
+        m = today.month + i
+        y = today.year
+        if m > 12:
+            m = m - 12
+            y = y + 1
+        months.append(f"{y:02d}-{m:02d}")
+
+    active_routes = Route.objects.filter(is_active=True)
+
+    for active_route in active_routes:
+        for month in months:
+            print(f"{active_route} {month}")
+            save_prices(active_route, month)
