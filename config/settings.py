@@ -147,3 +147,10 @@ CELERY_BEAT_SCHEDULE = {
         # "schedule": crontab(),
     },
 }
+
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": "redis://localhost:6379/1",
+    }
+}

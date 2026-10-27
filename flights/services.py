@@ -2,6 +2,7 @@ import os
 import requests
 from .models import FlightOffer, Route
 from datetime import date
+from django.core.cache import cache
 
 API_URL = "https://api.travelpayouts.com/aviasales/v3/prices_for_dates"
 
@@ -62,3 +63,5 @@ def fetch_all_prices():
         for month in months:
             print(f"{active_route} {month}")
             save_prices(active_route, month)
+
+    cache.clear()
