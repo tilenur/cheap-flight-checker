@@ -18,7 +18,11 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
+# All URLs of the project. Django checks them from top to bottom.
 urlpatterns = [
+    # /admin/  →  the admin page
     path("admin/", admin.site.urls),
+
+    # /api/...  →  the rest is in flights/urls.py  (/api/ + flights/)
     path("api/", include("flights.urls")),
 ]

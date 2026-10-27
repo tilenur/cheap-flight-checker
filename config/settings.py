@@ -17,6 +17,8 @@ from celery.schedules import crontab, schedule
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+# Load the secrets from the .env file (in the project folder) into the
+# environment. After this, os.environ.get("NAME") can read them anywhere.
 load_dotenv(BASE_DIR / ".env")
 
 # Quick-start development settings - unsuitable for production
@@ -42,7 +44,9 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    # Django REST Framework (for the API)
     "rest_framework",
+    # Our own app
     "flights",
 ]
 
@@ -79,6 +83,9 @@ WSGI_APPLICATION = "config.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/6.1/ref/settings/#databases
 
+# PostgreSQL in Docker. All values come from .env.
+# HOST is localhost and PORT is 5434, because Django runs on the Mac
+# and Docker sends Mac port 5434 to the container (see docker-compose.yml).
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
@@ -115,6 +122,8 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = "en-us"
 
+# Our clock. Django still saves times in UTC in the database (USE_TZ = True),
+# but things like found_at__date and timezone.localtime() use Bishkek time.
 TIME_ZONE = "Asia/Bishkek"
 
 USE_I18N = True
@@ -137,16 +146,31 @@ MAILERS = {
     },
 }
 
+
+
+# Celery
+#
+#   broker   = where tasks wait for the worker (Redis, drawer 0)
+#   timezone = Beat's clock, so 9:00 means 9:00 in Bishkek
+
 CELERY_BROKER_URL = "redis://localhost:6379/0"
 CELERY_TIMEZONE = "Asia/Bishkek"
 
+# Beat's schedule: which task to run, and when
 CELERY_BEAT_SCHEDULE = {
-    "every_morning_fetch_flights": {
-        "task": "flights.tasks.fetch_flights_task",
-        "schedule": crontab(hour=9, minute=00),
-        # "schedule": crontab(),
+    "every_morning_fetch_flights": {  # any name we like
+        "task": "flights.tasks.fetch_flights_task",  # app.file.function
+        "schedule": crontab(hour=9, minute=00),  # every day at 9:00
+        # "schedule": crontab(),  # every minute (for testing)
     },
 }
+
+
+# Cache
+#
+#   Redis, drawer 1 (drawer 0 is Celery's, so they don't mix)
+#   used by:     cache_page in views.py
+#   cleared by:  cache.clear() in services.py
 
 CACHES = {
     "default": {

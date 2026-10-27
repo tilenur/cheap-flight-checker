@@ -1,15 +1,36 @@
+# The programs our project needs, each in its own container.
+#
+#   start:  docker compose up -d
+#   stop:   docker compose down
+#
+# (Django and Celery are not here. They run on the Mac, in .venv.)
+
 services:
+  # PostgreSQL = the database
   db:
     image: postgres:17
+
+    # POSTGRES_DB / USER / PASSWORD come from .env
+    # (Postgres reads them only when the volume is created the first time)
     env_file:
       - .env
+
+    # "Mac port : container port"
+    # 5432 and 5433 were taken on the Mac, so we use 5434
     ports:
       - "5434:5432"
+
+    # The data is kept here, so it stays after a restart.
+    # ⚠️ "docker compose down -v" deletes it!
     volumes:
       - postgres_data:/var/lib/postgresql/data
+
+  # Redis = fast memory storage, with 2 jobs:
+  #   drawer 0 → Celery messages
+  #   drawer 1 → API cache
   redis:
     image: redis:7
-    ports: 
+    ports:
       - "6379:6379"
 
 volumes:
