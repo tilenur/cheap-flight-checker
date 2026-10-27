@@ -3,6 +3,7 @@ from .serializers import FlightOfferSerializer
 from .models import FlightOffer
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
+from django.utils import timezone
 
 
 # Create your views here.
@@ -15,7 +16,7 @@ class FlightOfferListView(ListAPIView):
         if FlightOffer.objects.exists():
             newest = FlightOffer.objects.latest("found_at")
             return FlightOffer.objects.filter(
-                found_at__date=newest.found_at.date()
+                found_at__date=timezone.localtime(newest.found_at).date()
             ).order_by("price")
         else:
             return FlightOffer.objects.none()
