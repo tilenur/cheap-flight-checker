@@ -79,9 +79,18 @@ def save_prices(route, month):
 
 # The main job: every active route × the next 3 months, then clear the cache.
 def fetch_all_prices():
+    # Today, on the Bishkek clock (e.g. Oct 28)
+    now = timezone.localtime()
+    today = now.date()
+
+    # Run twice on the same day → replace today's offers, don't add more.
+    # Only TODAY's rows are deleted. Older days stay (history).
+    #   01:00 test  → Oct 28: 14 offers
+    #   09:00 Beat  → delete those 14 → save 14 new → Oct 28: 14 offers
+    FlightOffer.objects.filter(found_at__date=today).delete()
+
     # The next 3 months, starting from NEXT month
     # e.g. in October: ["2026-11", "2026-12", "2027-01"]
-    today = date.today()
     months = []
     for i in range(1, 4):  # i = 1, 2, 3
         m = today.month + i
@@ -194,9 +203,13 @@ def build_message():
             # e.g. "Nov 22 $405 CZ 1 stop Book"
             #   %b %d          → "Nov 22"
             #   :.0f           → no numbers after the dot
-            #   split("?")[0]  → short link (Telegram's limit is 4096 characters)
+            #   split("&")[0]  → keep the page + "t=" (the ticket ID), cut the rest
+            #
+            #   full link:  .../search/BSZ0501TYO1?t=CZ1799...&search_date=...&expected_price=618
+            #   our link:   .../search/BSZ0501TYO1?t=CZ1799...
+            #   (the full link is too long: Telegram says ENTITIES_TOO_LONG)
             route_lines.append(
-                f"{departure.strftime("%b %d")} ${offer.price:.0f} {offer.airline} {status} <a href='{offer.link.split("?")[0]}'>Book</a>"
+                f"{departure.strftime("%b %d")} ${offer.price:.0f} {offer.airline} {status} <a href='{offer.link.split("&")[0]}'>Book</a>"
             )
 
         # Glue this route's lines → put them in one box → add to the big list
