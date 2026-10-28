@@ -165,7 +165,7 @@ def build_message():
     # The newest day, on the Bishkek clock (same as in views.py)
     newest = FlightOffer.objects.latest("found_at")
     day = timezone.localtime(newest.found_at).date()
-    active_routes = Route.objects.filter(is_active=True)
+    active_routes = Route.objects.filter(is_active=True).order_by("origin")
 
     # The BIG list = the whole message (title + empty line + boxes)
     lines = [f"✈️ Cheapest flights ({day.strftime('%b %d')})", ""]

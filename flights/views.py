@@ -5,7 +5,6 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from django.utils import timezone
 
-
 # Create your views here.
 
 
@@ -22,6 +21,8 @@ from django.utils import timezone
 #   cache_page        = the cache tool (made for functions)
 #   method_decorator  = lets us use it on a class
 #   name="get"        = put it on the get method (the browser sends GET)
+
+
 @method_decorator(cache_page(60 * 60), name="get")
 class FlightOfferListView(ListAPIView):
     # Which serializer turns the offers into JSON
